@@ -4,836 +4,1427 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light" />
-    <title>我的提示词库</title>
+    <title>个人资源库</title>
     <style>
-:root {
-      --blue: #3E6AE1;
-      --bg: #ffffff;
-      --alt: #f4f4f4;
-      --carbon: #171A20;
-      --graphite: #393C41;
-      --pewter: #5C5E62;
-      --silver: #8E8E8E;
-      --line: #e9e9e9;
-      --rail-width: 250px;
-      --index-width: 390px;
-      --font-sans: -apple-system, "Segoe UI", "Microsoft YaHei UI", "Noto Sans SC", "PingFang SC", Arial, sans-serif;
-      --font-mono: "SFMono-Regular", "Cascadia Mono", Consolas, "Courier New", monospace;
-    }
-
-    * { box-sizing: border-box; }
-    [hidden] { display: none !important; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      overflow: hidden;
-      color: var(--graphite);
-      background: var(--bg);
-      font-family: var(--font-sans);
-      font-weight: 400;
-      letter-spacing: normal;
-      text-rendering: optimizeLegibility;
-    }
-
-    button, input, textarea, select { font: inherit; }
-    button, select { cursor: pointer; }
-    button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
-      outline: 2px solid rgba(62, 106, 225, 0.5);
-      outline-offset: 2px;
-    }
-
-    .app-shell {
-      display: grid;
-      grid-template-columns: var(--rail-width) var(--index-width) minmax(0, 1fr);
-      height: 100vh;
-      min-height: 560px;
-    }
-
-    .library-rail {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      padding: 26px 20px 20px;
-      color: #fff;
-      background: var(--carbon);
-      overflow: auto;
-    }
-
-    .library-rail::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 4px;
-      height: 112px;
-      background: var(--blue);
-    }
-
-    .eyebrow {
-      margin: 0 0 10px;
-      color: var(--blue);
-      font: 500 11px/1.2 var(--font-mono);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
-    .brand h1 {
-      margin: 0;
-      font-size: 22px;
-      font-weight: 500;
-      line-height: 1.2;
-    }
-
-    .brand p {
-      margin: 10px 0 0;
-      color: #aeb3ba;
-      font-size: 12px;
-      line-height: 1.65;
-    }
-
-    .rail-stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1px;
-      margin: 22px 0 18px;
-      background: #4a4e55;
-    }
-
-    .stat {
-      padding: 12px;
-      background: #20242b;
-    }
-
-    .stat strong {
-      display: block;
-      color: #fff;
-      font: 500 20px/1 var(--font-mono);
-    }
-
-    .stat span {
-      display: block;
-      margin-top: 7px;
-      color: #a8adb4;
-      font-size: 11px;
-    }
-
-    .rail-label {
-      margin: 6px 8px 8px;
-      color: #7b818a;
-      font: 500 10px/1 var(--font-mono);
-      letter-spacing: 0.12em;
-    }
-
-    .category-nav {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .category-button {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 8px;
-      width: 100%;
-      min-height: 40px;
-      padding: 8px 12px;
-      color: #cdd2d8;
-      text-align: left;
-      background: transparent;
-      border: 0;
-      border-radius: var(--radius);
-      transition: background 0.33s, color 0.33s;
-    }
-
-    .category-button:hover { color: #fff; background: #2a2f37; }
-    .category-button.active {
-      color: #fff;
-      background: var(--blue);
-    }
-
-    .category-name {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    .category-count {
-      align-self: center;
-      font: 500 11px/1 var(--font-mono);
-      opacity: 0.75;
-    }
-
-    .rail-tools {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: auto;
-      padding-top: 18px;
-    }
-
-    .rail-button {
-      min-height: 40px;
-      padding: 8px 10px;
-      color: #e6eaef;
-      background: #262b33;
-      border: 1px solid #434a55;
-      border-radius: var(--radius);
-      font-size: 12px;
-      font-weight: 500;
-      transition: border-color 0.33s, background 0.33s;
-    }
-
-    .rail-button:hover { background: #313842; border-color: #5a6370; }
-    .build-note {
-      grid-column: 1 / -1;
-      margin: 5px 1px 0;
-      color: #7b818a;
-      font: 10px/1.5 var(--font-mono);
-    }
-
-    .index-pane {
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      background: var(--alt);
-      border-right: 1px solid var(--line);
-    }
-
-    .index-header {
-      padding: 22px 20px 14px;
-      background: var(--bg);
-      border-bottom: 1px solid var(--line);
-    }
-
-    .index-title-row {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-
-    .index-title-row h2 {
-      margin: 0;
-      font-size: 17px;
-      font-weight: 500;
-    }
-
-    .new-button {
-      min-height: 38px;
-      padding: 0 16px;
-      color: #fff;
-      background: var(--blue);
-      border: 0;
-      border-radius: var(--radius);
-      font-size: 13px;
-      font-weight: 500;
-      transition: background 0.33s;
-    }
-
-    .new-button:hover { background: #2f59c8; }
-
-    .search-wrap { position: relative; }
-    .search-wrap svg {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      width: 16px;
-      height: 16px;
-      transform: translateY(-50%);
-      color: var(--silver);
-      pointer-events: none;
-    }
-
-    .search-input {
-      width: 100%;
-      height: 44px;
-      padding: 0 40px 0 38px;
-      color: var(--carbon);
-      background: var(--alt);
-      border: 1px solid transparent;
-      border-radius: var(--radius);
-      transition: border-color 0.33s, background 0.33s;
-    }
-
-    .search-input:hover { border-color: var(--line); }
-    .search-input:focus { background: #fff; border-color: var(--blue); outline: none; }
-    .search-input::placeholder { color: var(--silver); }
-    .clear-search {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      width: 34px;
-      height: 34px;
-      color: var(--pewter);
-      background: transparent;
-      border: 0;
-      border-radius: var(--radius);
-      font-size: 20px;
-      line-height: 1;
-    }
-    .clear-search:hover { background: var(--alt); }
-
-    .index-meta {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-top: 12px;
-      color: var(--pewter);
-      font-size: 12px;
-    }
-
-    .sort-select {
-      min-height: 34px;
-      color: var(--carbon);
-      background: transparent;
-      border: 0;
-      border-bottom: 1px solid var(--line);
-      border-radius: 0;
-      font-size: 12px;
-    }
-
-    .prompt-list {
-      min-height: 0;
-      overflow: auto;
-      scrollbar-color: var(--line) transparent;
-    }
-
-    .prompt-row {
-      position: relative;
-      display: grid;
-      grid-template-columns: 42px minmax(0, 1fr) 28px;
-      gap: 10px;
-      width: 100%;
-      min-height: 112px;
-      padding: 16px 14px 14px 10px;
-      color: var(--carbon);
-      text-align: left;
-      background: transparent;
-      border: 0;
-      border-bottom: 1px solid var(--line);
-      transition: background 0.33s;
-    }
-
-    .prompt-row::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      width: 4px;
-      background: transparent;
-      transition: background 0.33s;
-    }
-
-    .prompt-row:hover { background: rgba(0, 0, 0, 0.03); }
-    .prompt-row.active { background: #fff; }
-    .prompt-row.active::before { background: var(--blue); }
-
-    .row-number {
-      color: var(--silver);
-      font: 500 12px/1.4 var(--font-mono);
-    }
-
-    .row-copy { min-width: 0; }
-    .row-category {
-      display: block;
-      margin-bottom: 7px;
-      color: var(--pewter);
-      font: 500 10px/1.2 var(--font-mono);
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .row-title {
-      display: -webkit-box;
-      overflow: hidden;
-      margin: 0;
-      font-size: 15px;
-      font-weight: 500;
-      line-height: 1.45;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;
-    }
-
-    .row-description {
-      display: -webkit-box;
-      overflow: hidden;
-      margin-top: 8px;
-      color: var(--pewter);
-      font-size: 11px;
-      line-height: 1.55;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 1;
-    }
-
-    .favorite-mark {
-      width: 28px;
-      height: 28px;
-      color: var(--silver);
-      background: transparent;
-      border: 0;
-      border-radius: 50%;
-      font-size: 19px;
-      line-height: 1;
-      transition: color 0.33s;
-    }
-    .favorite-mark.is-favorite { color: var(--blue); }
-
-    .empty-list {
-      padding: 48px 24px;
-      color: var(--pewter);
-      text-align: center;
-      line-height: 1.8;
-    }
-
-    .reader-pane {
-      position: relative;
-      min-width: 0;
-      background: var(--bg);
-      overflow: hidden;
-    }
-
-    .reader-empty {
-      display: grid;
-      place-items: center;
-      height: 100%;
-      padding: 40px;
-      color: var(--pewter);
-      text-align: center;
-      background: var(--alt);
-    }
-
-    .reader-empty strong {
-      display: block;
-      margin-bottom: 8px;
-      color: var(--carbon);
-      font-size: 20px;
-      font-weight: 500;
-    }
-
-    .reader {
-      display: grid;
-      grid-template-rows: auto minmax(0, 1fr);
-      height: 100%;
-    }
-
-    .reader-header {
-      padding: 25px 30px 18px;
-      background: var(--bg);
-      border-bottom: 1px solid var(--line);
-    }
-
-    .mobile-back {
-      display: none;
-      min-height: 38px;
-      margin-bottom: 14px;
-      color: var(--blue);
-      background: transparent;
-      border: 0;
-      font-weight: 500;
-    }
-
-    .reader-kicker {
-      margin: 0 0 10px;
-      color: var(--blue);
-      font: 500 11px/1.3 var(--font-mono);
-      letter-spacing: 0.08em;
-    }
-
-    .reader-title {
-      max-width: 860px;
-      margin: 0;
-      font-size: clamp(24px, 3vw, 39px);
-      font-weight: 500;
-      line-height: 1.18;
-    }
-
-    .reader-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px 16px;
-      margin-top: 13px;
-      color: var(--pewter);
-      font: 11px/1.4 var(--font-mono);
-    }
-
-    .reader-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 18px;
-    }
-
-    .action-button {
-      min-height: 40px;
-      padding: 0 16px;
-      color: var(--carbon);
-      background: var(--bg);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      font-size: 12px;
-      font-weight: 500;
-      transition: border-color 0.33s, background 0.33s;
-    }
-    .action-button:hover { border-color: var(--pewter); background: var(--alt); }
-    .action-button.primary { color: #fff; background: var(--blue); border-color: var(--blue); }
-    .action-button.primary:hover { background: #2f59c8; }
-    .action-button.danger { color: #a4262c; }
-
-    .reader-scroll {
-      min-height: 0;
-      overflow: auto;
-      padding: 28px 30px 70px;
-      background: var(--bg);
-    }
-
-    .tag-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 7px;
-      margin: 0 0 20px 30px;
-    }
-
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      min-height: 26px;
-      padding: 4px 10px;
-      color: var(--graphite);
-      background: var(--alt);
-      border-radius: var(--radius);
-      font-size: 11px;
-      font-weight: 500;
-    }
-
-    .prompt-content {
-      position: relative;
-      max-width: 900px;
-      min-height: 320px;
-      margin: 0;
-      padding: 0 0 0 30px;
-      color: var(--graphite);
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-      font: 14px/1.9 var(--font-sans);
-      tab-size: 2;
-    }
-
-    .prompt-content::before {
-      content: "TEXT";
-      position: absolute;
-      top: 3px;
-      left: -50px;
-      color: var(--silver);
-      font: 500 9px/1 var(--font-mono);
-      letter-spacing: 0.12em;
-      transform: rotate(-90deg);
-    }
-
-    .source-note {
-      max-width: 900px;
-      margin: 34px 0 0 30px;
-      padding-top: 14px;
-      color: var(--silver);
-      border-top: 1px solid var(--line);
-      font: 10px/1.7 var(--font-mono);
-      overflow-wrap: anywhere;
-    }
-
-    .toast {
-      position: fixed;
-      right: 24px;
-      bottom: 24px;
-      z-index: 50;
-      max-width: min(360px, calc(100vw - 32px));
-      padding: 12px 16px;
-      color: #fff;
-      background: var(--carbon);
-      border-radius: var(--radius);
-      transform: translateY(18px);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.33s, transform 0.33s;
-    }
-    .toast.show { transform: translateY(0); opacity: 1; }
-
-    dialog {
-      width: min(760px, calc(100vw - 32px));
-      max-height: calc(100vh - 36px);
-      padding: 0;
-      color: var(--carbon);
-      background: var(--bg);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-    }
-    dialog::backdrop { background: rgba(23, 26, 32, 0.5); backdrop-filter: blur(2px); }
-
-    .dialog-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
-      padding: 18px 20px;
-      background: var(--carbon);
-      color: #fff;
-    }
-    .dialog-header h2 { margin: 0; font-size: 17px; font-weight: 500; }
-    .dialog-close {
-      width: 36px;
-      height: 36px;
-      color: #fff;
-      background: transparent;
-      border: 1px solid #434a55;
-      border-radius: var(--radius);
-      font-size: 22px;
-    }
-
-    .editor-form {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      padding: 20px;
-      overflow: auto;
-    }
-    .field { display: flex; flex-direction: column; gap: 7px; }
-    .field.full { grid-column: 1 / -1; }
-    .field label { font-size: 12px; font-weight: 500; }
-    .field input, .field textarea {
-      width: 100%;
-      padding: 10px 11px;
-      color: var(--carbon);
-      background: var(--bg);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      transition: border-color 0.33s;
-    }
-    .field input:focus, .field textarea:focus { border-color: var(--blue); outline: none; }
-    .field textarea { min-height: 290px; resize: vertical; line-height: 1.65; }
-    .dialog-actions {
-      grid-column: 1 / -1;
-      display: flex;
-      justify-content: flex-end;
-      gap: 9px;
-      padding-top: 3px;
-    }
-
-    @media (max-width: 1120px) {
-      :root { --rail-width: 220px; --index-width: 340px; }
-      .reader-header, .reader-scroll { padding-left: 24px; padding-right: 24px; }
-    }
-
-    @media (max-width: 880px) {
-      body { overflow: hidden; }
-      .app-shell {
-        grid-template-columns: 330px minmax(0, 1fr);
-        grid-template-rows: auto minmax(0, 1fr);
+      :root {
+        --bg-outer: #0a3527;
+        --bg-panel: #0e4434;
+        --cream: #f6f1e4;
+        --cream-soft: #efe9da;
+        --cream-deep: #e3dcca;
+        --gold: #c9a15c;
+        --gold-bright: #d9b26a;
+        --gold-deep: #a9853f;
+        --ink-green: #123b2e;
+        --ink-soft: #2e4a3e;
+        --text-light: #f3efe4;
+        --muted-light: rgba(243, 239, 228, 0.62);
+        --line-light: rgba(246, 241, 228, 0.14);
+        --danger: #a4262c;
+        --font-sans:
+          "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei",
+          "Noto Sans SC", "Source Han Sans SC", Arial, sans-serif;
+        --font-mono: "SFMono-Regular", "Cascadia Mono", Consolas, monospace;
       }
-      .library-rail {
-        grid-column: 1 / -1;
-        display: grid;
-        grid-template-columns: 185px 1fr auto;
-        align-items: center;
-        gap: 14px;
-        padding: 12px 14px;
-        overflow: visible;
-      }
-      .library-rail::before, .brand p, .rail-label, .build-note { display: none; }
-      .brand h1 { font-size: 18px; }
-      .eyebrow { margin-bottom: 4px; font-size: 9px; }
-      .rail-stats { display: none; }
-      .category-nav { flex-direction: row; overflow-x: auto; }
-      .category-button { display: flex; width: auto; min-width: max-content; min-height: 38px; }
-      .rail-tools { display: flex; margin: 0; padding: 0; }
-      .rail-button { width: 40px; overflow: hidden; color: transparent; position: relative; }
-      .rail-button::after { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font: 500 14px var(--font-mono); }
-      #exportButton::after { content: "\21E9"; }
-      #importButton::after { content: "\21E7"; }
-    }
 
-    @media (max-width: 680px) {
-      .app-shell { display: block; height: 100vh; }
-      .library-rail { display: flex; gap: 10px; height: 116px; padding: 12px; }
-      .brand { display: flex; align-items: baseline; gap: 10px; width: 100%; }
-      .category-nav { width: calc(100vw - 24px); }
-      .rail-tools { position: absolute; top: 10px; right: 10px; }
-      .index-pane { height: calc(100vh - 116px); border-right: 0; }
-      .index-header { padding: 14px 14px 12px; }
-      .reader-pane {
+      * {
+        box-sizing: border-box;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      html,
+      body {
+        min-height: 100%;
+      }
+      body {
+        margin: 0;
+        color: var(--text-light);
+        background: var(--bg-outer);
+        font-family: var(--font-sans);
+        text-rendering: optimizeLegibility;
+        overflow-x: hidden;
+      }
+
+      button,
+      input,
+      textarea,
+      select {
+        font: inherit;
+      }
+      button,
+      select {
+        cursor: pointer;
+      }
+      button:focus-visible,
+      input:focus-visible,
+      textarea:focus-visible,
+      select:focus-visible {
+        outline: 2px solid rgba(217, 178, 106, 0.7);
+        outline-offset: 2px;
+      }
+
+      /* ---------- 背景装饰 ---------- */
+      .backdrop {
         position: fixed;
         inset: 0;
-        z-index: 30;
+        z-index: 0;
+        overflow: hidden;
+        pointer-events: none;
+      }
+      .blob {
+        position: absolute;
+        border-radius: 50%;
+      }
+      .blob-a {
+        top: -220px;
+        right: 12%;
+        width: 560px;
+        height: 560px;
+        background: radial-gradient(
+          circle at 42% 40%,
+          #e7c47f 0%,
+          #cfa558 55%,
+          #b98d43 100%
+        );
+        opacity: 0.95;
+      }
+      .blob-b {
+        top: 130px;
+        right: -180px;
+        width: 520px;
+        height: 520px;
+        background: #f4efe1;
+        opacity: 0.92;
+      }
+      .blob-c {
+        bottom: -260px;
+        left: -140px;
+        width: 620px;
+        height: 620px;
+        background: radial-gradient(
+          circle at 55% 45%,
+          #e2bd76 0%,
+          #c69c50 60%,
+          #b08a45 100%
+        );
+        opacity: 0.9;
+      }
+      .blob-d {
+        bottom: -120px;
+        left: 30%;
+        width: 420px;
+        height: 420px;
+        background: #f4efe1;
+        opacity: 0.85;
+      }
+      .wire {
+        position: absolute;
+        border: 1px solid rgba(217, 178, 106, 0.55);
+        border-radius: 10px;
+      }
+      .wire-a {
+        top: 26px;
+        left: 34px;
+        width: 250px;
+        height: 300px;
+      }
+      .wire-b {
+        top: 60px;
+        left: 66px;
+        width: 420px;
+        height: 150px;
+        border-radius: 8px;
+      }
+      .wire-c {
+        top: 300px;
+        left: 70px;
+        width: 300px;
+        height: 560px;
+      }
+      .wire-d {
+        top: 150px;
+        right: 74px;
+        width: 120px;
+        height: 440px;
+      }
+      .wire-e {
+        bottom: 60px;
+        right: 60px;
+        width: 210px;
+        height: 260px;
+      }
+      .wire-f {
+        top: 330px;
+        right: 40px;
+        width: 150px;
+        height: 44px;
+        border-radius: 8px;
+        background: linear-gradient(90deg, #d9b26a, #c1954c);
+        border: 0;
+      }
+      .wire-lines {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .wire-lines i {
+        display: block;
+        height: 10px;
+        border: 1px solid rgba(217, 178, 106, 0.55);
+        border-radius: 5px;
+      }
+      .wire-lines-a {
+        top: 330px;
+        right: 40px;
+        width: 150px;
+      }
+      .wire-lines-b {
+        bottom: 210px;
+        left: 84px;
+        width: 130px;
+      }
+
+      /* ---------- 主面板 ---------- */
+      .app-shell {
+        position: relative;
+        z-index: 1;
+        max-width: 1460px;
+        margin: 64px auto 72px;
+        background: var(--bg-panel);
+        border-radius: 18px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        min-height: calc(100vh - 136px);
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 12px 28px;
+        font-size: 12px;
+        color: var(--muted-light);
+        border-bottom: 1px solid var(--line-light);
+      }
+      .topbar-left,
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .topbar i {
+        width: 1px;
+        height: 12px;
+        background: var(--line-light);
+      }
+      .topbar strong {
+        color: var(--text-light);
+        font-weight: 600;
+      }
+      .topbar .dim {
+        opacity: 0.75;
+      }
+
+      .site-nav {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        padding: 18px 28px;
+        border-bottom: 1px solid var(--line-light);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+      .brand-logo {
+        width: 26px;
+        height: 26px;
+        color: var(--gold-bright);
+        flex: none;
+      }
+      .brand h1 {
+        margin: 0;
+        font-size: 21px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+      }
+
+      .main-nav {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 auto;
+      }
+      .nav-link {
+        padding: 8px 16px;
+        color: var(--text-light);
+        background: transparent;
+        border: 0;
+        border-radius: 6px;
+        font-size: 15px;
+        font-weight: 500;
+        transition:
+          color 0.25s,
+          background 0.25s;
+      }
+      .nav-link:hover {
+        color: var(--gold-bright);
+      }
+      .nav-link.active {
+        color: var(--gold-bright);
+        font-weight: 600;
+      }
+
+      .nav-search {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 300px;
+        flex: none;
+      }
+      .nav-search svg.mag {
+        position: absolute;
+        width: 15px;
+        height: 15px;
+        color: var(--muted-light);
+        pointer-events: none;
+      }
+      .nav-search svg.mag-left {
+        left: 14px;
+      }
+      .nav-search svg.mag-right {
+        right: 14px;
+      }
+      .nav-search input {
+        width: 100%;
+        height: 40px;
+        padding: 0 40px;
+        color: var(--text-light);
+        background: transparent;
+        border: 1px solid rgba(246, 241, 228, 0.35);
+        border-radius: 999px;
+        font-size: 13px;
+        transition:
+          border-color 0.25s,
+          background 0.25s;
+      }
+      .nav-search input::placeholder {
+        color: var(--muted-light);
+      }
+      .nav-search input:focus {
+        border-color: var(--gold);
+        background: rgba(255, 255, 255, 0.05);
+        outline: none;
+      }
+      .clear-search {
+        position: absolute;
+        right: 34px;
+        width: 22px;
+        height: 22px;
+        color: var(--muted-light);
+        background: transparent;
+        border: 0;
+        border-radius: 50%;
+        font-size: 15px;
+        line-height: 1;
+      }
+      .clear-search:hover {
+        color: var(--text-light);
+      }
+
+      /* ---------- 首屏 ---------- */
+      .hero {
+        padding: 64px 48px 40px;
+        text-align: center;
+      }
+      .hero-title {
+        margin: 0;
+        font-size: clamp(28px, 3.4vw, 44px);
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        color: #ffffff;
+      }
+      .hero-sub {
+        margin: 18px 0 0;
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--text-light);
+      }
+
+      /* ---------- 资产卡片 ---------- */
+      .card-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 26px;
+        padding: 26px 48px 52px;
+      }
+
+      .asset-card {
+        display: flex;
+        flex-direction: column;
+        padding: 28px 28px 30px;
+        background: var(--cream);
+        border-radius: 10px;
+        color: var(--ink-green);
+      }
+
+      .asset-card header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .asset-card h3 {
+        margin: 0;
+        font-size: 21px;
+        font-weight: 700;
+      }
+      .card-minus {
+        display: grid;
+        place-items: center;
+        width: 34px;
+        height: 34px;
+        color: var(--gold);
+        border: 1.5px solid var(--gold);
+        border-radius: 50%;
+        font-size: 16px;
+        line-height: 1;
+      }
+
+      .card-icon {
+        display: grid;
+        place-items: center;
+        padding: 34px 0 26px;
+      }
+      .card-icon svg {
+        width: 128px;
+        height: 128px;
+      }
+
+      .card-count {
+        margin: 0 0 12px;
+        text-align: center;
+        color: #8b8676;
+        font-size: 12px;
+      }
+      .card-count strong {
+        color: #8b8676;
+        font-weight: 600;
+      }
+
+      .card-bar {
+        width: 62%;
+        height: 6px;
+        margin: 0 auto;
+        background: var(--cream-deep);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .card-bar i {
+        display: block;
+        height: 100%;
+        border-radius: 3px;
+      }
+      .card-bar .gold {
+        background: var(--gold);
+      }
+      .card-bar .green {
+        background: var(--ink-green);
+      }
+
+      .enter-button {
+        margin-top: 26px;
+        min-height: 52px;
+        color: var(--gold-bright);
+        background: var(--ink-green);
+        border: 0;
+        border-radius: 6px;
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 0.3em;
+        text-indent: 0.3em;
+        transition:
+          filter 0.25s,
+          transform 0.25s;
+      }
+      .enter-button:hover {
+        filter: brightness(1.15);
+      }
+      .enter-button.gold {
+        color: var(--ink-green);
+        background: linear-gradient(90deg, #dcb56e 0%, #c1954c 100%);
+      }
+
+      /* ---------- 工作区（进入后） ---------- */
+      .workspace {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        margin: 0 28px 28px;
+        border: 1px solid var(--line-light);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .in-library .hero,
+      .in-library .card-row {
         display: none;
       }
-      .reader-pane.mobile-open { display: block; }
-      .mobile-back { display: inline-flex; align-items: center; padding: 0; }
-      .reader-header { padding: 16px 18px 14px; }
-      .reader-title { font-size: 25px; }
-      .reader-scroll { padding: 22px 18px 58px; background: var(--bg); }
-      .tag-row, .prompt-content, .source-note { margin-left: 0; padding-left: 0; }
-      .prompt-content::before { display: none; }
-      .editor-form { grid-template-columns: 1fr; padding: 16px; }
-      .field.full, .dialog-actions { grid-column: 1; }
-      .field textarea { min-height: 240px; }
-    }
+      .in-library .workspace {
+        display: flex;
+      }
+      .workspace[hidden] {
+        display: none;
+      }
 
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
-    }
-</style>
+      .ws-bar {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px;
+        padding: 14px 18px;
+        background: rgba(255, 255, 255, 0.04);
+        border-bottom: 1px solid var(--line-light);
+      }
+      .ws-back {
+        padding: 8px 12px;
+        color: var(--gold-bright);
+        background: transparent;
+        border: 0;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .ws-back:hover {
+        background: rgba(255, 255, 255, 0.06);
+      }
+      .ws-bar h2 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 700;
+      }
+      .ws-meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-left: auto;
+        flex-wrap: wrap;
+      }
+      .ws-meta #resultCount {
+        color: var(--muted-light);
+        font-size: 12px;
+      }
+
+      .sort-select {
+        min-height: 34px;
+        padding: 0 8px;
+        color: var(--text-light);
+        background: transparent;
+        border: 1px solid var(--line-light);
+        border-radius: 6px;
+        font-size: 12px;
+      }
+      .sort-select option {
+        color: var(--ink-green);
+        background: var(--cream);
+      }
+
+      .new-button {
+        min-height: 36px;
+        padding: 0 16px;
+        color: var(--ink-green);
+        background: linear-gradient(90deg, #dcb56e, #c1954c);
+        border: 0;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .new-button:hover {
+        filter: brightness(1.08);
+      }
+
+      .rail-button {
+        min-height: 36px;
+        padding: 0 12px;
+        color: var(--text-light);
+        background: transparent;
+        border: 1px solid rgba(246, 241, 228, 0.3);
+        border-radius: 6px;
+        font-size: 12px;
+        transition:
+          border-color 0.25s,
+          background 0.25s;
+      }
+      .rail-button:hover {
+        border-color: var(--gold);
+        color: var(--gold-bright);
+      }
+
+      .ws-body {
+        display: grid;
+        grid-template-columns: 232px 372px minmax(0, 1fr);
+        flex: 1;
+        min-height: 520px;
+      }
+
+      .category-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding: 14px 10px;
+        overflow: auto;
+        border-right: 1px solid var(--line-light);
+      }
+      .category-button {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+        width: 100%;
+        min-height: 40px;
+        padding: 8px 12px;
+        color: var(--muted-light);
+        text-align: left;
+        background: transparent;
+        border: 0;
+        border-radius: 6px;
+        font-size: 13px;
+        transition:
+          background 0.25s,
+          color 0.25s;
+      }
+      .category-button:hover {
+        color: var(--text-light);
+        background: rgba(255, 255, 255, 0.06);
+      }
+      .category-button.active {
+        color: var(--ink-green);
+        background: var(--gold-bright);
+        font-weight: 600;
+      }
+      .category-name {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .category-count {
+        align-self: center;
+        font: 500 11px/1 var(--font-mono);
+        opacity: 0.8;
+      }
+
+      .prompt-list {
+        min-height: 0;
+        overflow: auto;
+        background: var(--cream);
+        scrollbar-color: var(--cream-deep) transparent;
+      }
+
+      .prompt-row {
+        position: relative;
+        display: grid;
+        grid-template-columns: 38px minmax(0, 1fr) 28px;
+        gap: 10px;
+        width: 100%;
+        min-height: 108px;
+        padding: 16px 14px 14px 10px;
+        color: var(--ink-green);
+        text-align: left;
+        background: transparent;
+        border: 0;
+        border-bottom: 1px solid var(--cream-deep);
+        transition: background 0.25s;
+      }
+      .prompt-row::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 4px;
+        background: transparent;
+        transition: background 0.25s;
+      }
+      .prompt-row:hover {
+        background: rgba(255, 255, 255, 0.55);
+      }
+      .prompt-row.active {
+        background: #fffdf6;
+      }
+      .prompt-row.active::before {
+        background: var(--gold);
+      }
+
+      .row-number {
+        color: #a49e8c;
+        font: 600 12px/1.4 var(--font-mono);
+      }
+      .row-copy {
+        min-width: 0;
+      }
+      .row-category {
+        display: block;
+        margin-bottom: 7px;
+        color: var(--gold-deep);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .row-title {
+        display: -webkit-box;
+        overflow: hidden;
+        margin: 0;
+        font-size: 15px;
+        font-weight: 700;
+        line-height: 1.45;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+      }
+      .row-description {
+        display: -webkit-box;
+        overflow: hidden;
+        margin-top: 8px;
+        color: #77715f;
+        font-size: 11px;
+        line-height: 1.55;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 1;
+      }
+      .favorite-mark {
+        width: 28px;
+        height: 28px;
+        color: #b3ad9b;
+        background: transparent;
+        border: 0;
+        border-radius: 50%;
+        font-size: 18px;
+        line-height: 1;
+        transition: color 0.25s;
+      }
+      .favorite-mark.is-favorite {
+        color: var(--gold);
+      }
+
+      .empty-list {
+        padding: 48px 24px;
+        color: #77715f;
+        text-align: center;
+        line-height: 1.8;
+      }
+
+      .reader-pane {
+        position: relative;
+        min-width: 0;
+        background: #fbf8ef;
+        overflow: hidden;
+      }
+      .reader-empty {
+        display: grid;
+        place-items: center;
+        height: 100%;
+        padding: 40px;
+        color: #77715f;
+        text-align: center;
+      }
+      .reader-empty strong {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--ink-green);
+        font-size: 20px;
+        font-weight: 700;
+      }
+
+      .reader {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        height: 100%;
+      }
+      .reader-header {
+        padding: 24px 30px 18px;
+        background: #fbf8ef;
+        border-bottom: 1px solid var(--cream-deep);
+      }
+      .mobile-back {
+        display: none;
+        min-height: 38px;
+        margin-bottom: 12px;
+        color: var(--gold-deep);
+        background: transparent;
+        border: 0;
+        font-weight: 600;
+      }
+      .reader-kicker {
+        margin: 0 0 10px;
+        color: var(--gold-deep);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+      }
+      .reader-title {
+        max-width: 860px;
+        margin: 0;
+        color: var(--ink-green);
+        font-size: clamp(22px, 2.6vw, 34px);
+        font-weight: 700;
+        line-height: 1.22;
+      }
+      .reader-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 16px;
+        margin-top: 12px;
+        color: #8b8676;
+        font: 11px/1.4 var(--font-mono);
+      }
+      .reader-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 18px;
+      }
+
+      .action-button {
+        min-height: 40px;
+        padding: 0 16px;
+        color: var(--ink-green);
+        background: transparent;
+        border: 1px solid rgba(18, 59, 46, 0.35);
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        transition:
+          border-color 0.25s,
+          background 0.25s,
+          color 0.25s;
+      }
+      .action-button:hover {
+        background: rgba(18, 59, 46, 0.06);
+      }
+      .action-button.primary {
+        color: var(--gold-bright);
+        background: var(--ink-green);
+        border-color: var(--ink-green);
+      }
+      .action-button.primary:hover {
+        filter: brightness(1.2);
+        background: var(--ink-green);
+      }
+      .action-button.danger {
+        color: var(--danger);
+        border-color: rgba(164, 38, 44, 0.4);
+      }
+
+      .reader-scroll {
+        min-height: 0;
+        overflow: auto;
+        padding: 26px 30px 70px;
+      }
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin: 0 0 20px;
+      }
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        min-height: 26px;
+        padding: 4px 10px;
+        color: var(--ink-soft);
+        background: var(--cream-soft);
+        border: 1px solid var(--cream-deep);
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 500;
+      }
+      .prompt-content {
+        max-width: 900px;
+        min-height: 320px;
+        margin: 0;
+        color: var(--ink-soft);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        font: 14px/1.9 var(--font-sans);
+        tab-size: 2;
+      }
+      .source-note {
+        max-width: 900px;
+        margin: 34px 0 0;
+        padding-top: 14px;
+        color: #a49e8c;
+        border-top: 1px solid var(--cream-deep);
+        font: 10px/1.7 var(--font-mono);
+        overflow-wrap: anywhere;
+      }
+
+      .toast {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        z-index: 60;
+        max-width: min(360px, calc(100vw - 32px));
+        padding: 12px 16px;
+        color: var(--text-light);
+        background: var(--ink-green);
+        border: 1px solid rgba(217, 178, 106, 0.5);
+        border-radius: 8px;
+        transform: translateY(18px);
+        opacity: 0;
+        pointer-events: none;
+        transition:
+          opacity 0.25s,
+          transform 0.25s;
+      }
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      dialog {
+        width: min(760px, calc(100vw - 32px));
+        max-height: calc(100vh - 36px);
+        padding: 0;
+        color: var(--ink-green);
+        background: var(--cream);
+        border: 0;
+        border-radius: 12px;
+      }
+      dialog::backdrop {
+        background: rgba(6, 26, 19, 0.6);
+        backdrop-filter: blur(2px);
+      }
+      .dialog-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 16px 20px;
+        background: var(--ink-green);
+        color: var(--cream);
+      }
+      .dialog-header h2 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 700;
+      }
+      .dialog-close {
+        width: 34px;
+        height: 34px;
+        color: var(--cream);
+        background: transparent;
+        border: 1px solid rgba(246, 241, 228, 0.35);
+        border-radius: 6px;
+        font-size: 20px;
+      }
+      .editor-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        padding: 20px;
+        overflow: auto;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+      }
+      .field.full {
+        grid-column: 1 / -1;
+      }
+      .field label {
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .field input,
+      .field textarea {
+        width: 100%;
+        padding: 10px 11px;
+        color: var(--ink-green);
+        background: #fffdf6;
+        border: 1px solid var(--cream-deep);
+        border-radius: 6px;
+        transition: border-color 0.25s;
+      }
+      .field input:focus,
+      .field textarea:focus {
+        border-color: var(--gold);
+        outline: none;
+      }
+      .field textarea {
+        min-height: 290px;
+        resize: vertical;
+        line-height: 1.65;
+      }
+      .dialog-actions {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: flex-end;
+        gap: 9px;
+        padding-top: 3px;
+      }
+
+      /* ---------- 响应式 ---------- */
+      @media (max-width: 1120px) {
+        .ws-body {
+          grid-template-columns: 200px 320px minmax(0, 1fr);
+        }
+        .main-nav {
+          gap: 0;
+        }
+        .nav-link {
+          padding: 8px 10px;
+          font-size: 14px;
+        }
+        .nav-search {
+          width: 240px;
+        }
+      }
+
+      @media (max-width: 960px) {
+        .app-shell {
+          margin: 24px 16px 40px;
+          min-height: calc(100vh - 64px);
+        }
+        .main-nav {
+          display: none;
+        }
+        .site-nav {
+          gap: 16px;
+        }
+        .nav-search {
+          margin-left: auto;
+          width: min(320px, 100%);
+        }
+        .card-row {
+          grid-template-columns: 1fr;
+          padding: 20px 24px 40px;
+        }
+        .hero {
+          padding: 44px 24px 28px;
+        }
+        .ws-body {
+          grid-template-columns: 210px minmax(0, 1fr);
+        }
+        .category-nav {
+          border-right: 1px solid var(--line-light);
+        }
+        .reader-pane {
+          position: fixed;
+          inset: 0;
+          z-index: 40;
+          display: none;
+        }
+        .reader-pane.mobile-open {
+          display: block;
+        }
+        .mobile-back {
+          display: inline-flex;
+          align-items: center;
+          padding: 0;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .topbar-right {
+          display: none;
+        }
+        .ws-body {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .category-nav {
+          flex-direction: row;
+          overflow-x: auto;
+          border-right: 0;
+          border-bottom: 1px solid var(--line-light);
+          padding: 8px;
+        }
+        .category-button {
+          width: auto;
+          min-width: max-content;
+        }
+        .prompt-list {
+          max-height: 46vh;
+        }
+        .reader-header {
+          padding: 16px 18px 14px;
+        }
+        .reader-scroll {
+          padding: 20px 18px 58px;
+        }
+        .editor-form {
+          grid-template-columns: 1fr;
+          padding: 16px;
+        }
+        .field.full,
+        .dialog-actions {
+          grid-column: 1;
+        }
+        .field textarea {
+          min-height: 240px;
+        }
+        .ws-bar {
+          padding: 10px 12px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div class="app-shell">
-      <aside class="library-rail" aria-label="提示词分类">
+    <div class="backdrop" aria-hidden="true">
+      <div class="blob blob-a"></div>
+      <div class="blob blob-b"></div>
+      <div class="blob blob-c"></div>
+      <div class="blob blob-d"></div>
+      <div class="wire wire-a"></div>
+      <div class="wire wire-b"></div>
+      <div class="wire wire-c"></div>
+      <div class="wire wire-d"></div>
+      <div class="wire wire-e"></div>
+      <div class="wire wire-f"></div>
+      <div class="wire-lines wire-lines-a"><i></i><i></i><i></i><i></i></div>
+      <div class="wire-lines wire-lines-b"><i></i><i></i><i></i></div>
+    </div>
+
+    <div class="app-shell" id="appShell">
+      <div class="topbar">
+        <div class="topbar-left">
+          <span>商业级SaaS</span><i></i> <strong>个人资源库</strong><i></i>
+          <span class="dim">UI设计</span>
+        </div>
+        <div class="topbar-right">
+          <span class="dim">页面</span>
+          <strong>16:9</strong><i></i>
+          <span class="dim">Modern ▾</span>
+        </div>
+      </div>
+
+      <header class="site-nav">
         <div class="brand">
-          <p class="eyebrow">Prompt Atlas / 01</p>
-          <h1>我的提示词库</h1>
-          <p>把散落的创作方法收进一套可搜索、可维护的个人资料索引。</p>
-        </div>
-
-        <div class="rail-stats" aria-label="资料库统计">
-          <div class="stat">
-            <strong id="totalCount">0</strong><span>全部资料</span>
-          </div>
-          <div class="stat">
-            <strong id="favoriteCount">0</strong><span>已收藏</span>
-          </div>
-        </div>
-
-        <p class="rail-label">COLLECTIONS</p>
-        <nav class="category-nav" id="categoryNav"></nav>
-
-        <div class="rail-tools">
-          <button class="rail-button" id="exportButton" type="button">
-            导出备份
-          </button>
-          <button class="rail-button" id="importButton" type="button">
-            导入备份
-          </button>
-          <input
-            id="importFile"
-            type="file"
-            accept="application/json,.json"
-            hidden
-          />
-          <p class="build-note">离线单文件 · 构建于 2026-09-12 16:22</p>
-        </div>
-      </aside>
-
-      <section class="index-pane" aria-label="提示词目录">
-        <header class="index-header">
-          <div class="index-title-row">
-            <h2 id="indexHeading">全部提示词</h2>
-            <button class="new-button" id="newPromptButton" type="button">
-              ＋ 新建
-            </button>
-          </div>
-          <div class="search-wrap">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
+          <svg
+            class="brand-logo"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path d="M12 2 21 7l-9 5-9-5 9-5Z" fill="currentColor" />
+            <path d="M3 12l9 5 9-5" stroke="currentColor" stroke-width="1.7" />
+            <path
+              d="M3 16.5 12 21.5l9-5"
               stroke="currentColor"
-              stroke-width="2"
+              stroke-width="1.7"
+            />
+          </svg>
+          <h1>个人资源库</h1>
+        </div>
+        <nav class="main-nav" aria-label="主导航">
+          <button class="nav-link" type="button" data-nav="home">
+            资源中心
+          </button>
+          <button class="nav-link" type="button" data-nav="library">
+            分类浏览
+          </button>
+          <button class="nav-link active" type="button" data-nav="library">
+            精选专题
+          </button>
+          <button class="nav-link" type="button" data-nav="library">
+            贡献者
+          </button>
+          <button class="nav-link" type="button" data-nav="library">
+            帮助
+          </button>
+        </nav>
+        <div class="nav-search">
+          <svg
+            class="mag mag-left"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m20 20-4-4"></path>
+          </svg>
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="搜索品牌素材、模板、规范"
+            aria-label="搜索提示词"
+          />
+          <button
+            class="clear-search"
+            id="clearSearch"
+            type="button"
+            aria-label="清空搜索"
+            hidden
+          >
+            ×
+          </button>
+          <svg
+            class="mag mag-right"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m20 20-4-4"></path>
+          </svg>
+        </div>
+      </header>
+
+      <section class="hero">
+        <h2 class="hero-title">沉淀个人资产，加速创作流程</h2>
+        <p class="hero-sub">
+          从设计规范到代码片段，从灵感参考到项目模板，全部结构化管理
+        </p>
+      </section>
+
+      <section class="card-row" aria-label="资源入口">
+        <article class="asset-card">
+          <header>
+            <h3>设计资产</h3>
+            <span class="card-minus" aria-hidden="true">−</span>
+          </header>
+          <div class="card-icon">
+            <svg
+              viewBox="0 0 128 128"
+              fill="none"
+              stroke="#123b2e"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
               aria-hidden="true"
             >
-              <circle cx="11" cy="11" r="7"></circle>
-              <path d="m20 20-4-4"></path>
+              <path d="M64 12 92 27v30L64 72 36 57V27L64 12Z" />
+              <path d="M36 27l28 15 28-15" />
+              <path d="M52 42l9 9 17-17" stroke-width="4" />
+              <path d="M26 82l38 19 38-19" />
+              <path d="M26 97l38 19 38-19" />
             </svg>
-            <input
-              class="search-input"
-              id="searchInput"
-              type="search"
-              placeholder="搜索标题、正文或标签"
-              aria-label="搜索提示词"
-            />
-            <button
-              class="clear-search"
-              id="clearSearch"
-              type="button"
-              aria-label="清空搜索"
-              hidden
-            >
-              ×
-            </button>
           </div>
-          <div class="index-meta">
+          <p class="card-count">全部共 <strong id="totalCount">0</strong> 条</p>
+          <div class="card-bar">
+            <i class="gold" id="barA" style="width: 60%"></i>
+          </div>
+          <button class="enter-button" type="button" data-enter="all">
+            进入
+          </button>
+        </article>
+
+        <article class="asset-card">
+          <header>
+            <h3>开发资源</h3>
+            <span class="card-minus" aria-hidden="true">−</span>
+          </header>
+          <div class="card-icon">
+            <svg
+              viewBox="0 0 128 128"
+              fill="none"
+              stroke="#123b2e"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M64 10 108 35v52L64 112 20 87V35L64 10Z" />
+              <path d="M42 46l22 13 22-13" />
+              <path d="M42 63l22 13 22-13" />
+              <path d="M42 80l22 13 22-13" />
+            </svg>
+          </div>
+          <p class="card-count">
+            已收藏 <strong id="favoriteCount">0</strong> 条
+          </p>
+          <div class="card-bar">
+            <i class="green" id="barB" style="width: 34%"></i>
+          </div>
+          <button class="enter-button" type="button" data-enter="favorites">
+            进入
+          </button>
+        </article>
+
+        <article class="asset-card">
+          <header>
+            <h3>灵感知识库</h3>
+            <span class="card-minus" aria-hidden="true">−</span>
+          </header>
+          <div class="card-icon">
+            <svg viewBox="0 0 128 128" fill="none" aria-hidden="true">
+              <circle
+                cx="64"
+                cy="64"
+                r="50"
+                stroke="#e3dcca"
+                stroke-width="3"
+              />
+              <path
+                d="M64 14a50 50 0 0 1 50 50"
+                stroke="#c9a15c"
+                stroke-width="4.5"
+                stroke-linecap="round"
+              />
+              <rect
+                x="45"
+                y="38"
+                width="34"
+                height="44"
+                rx="4"
+                stroke="#123b2e"
+                stroke-width="3"
+              />
+              <path
+                d="M53 52h18M53 62h18"
+                stroke="#123b2e"
+                stroke-width="3"
+                stroke-linecap="round"
+              />
+              <circle cx="83" cy="79" r="12" fill="#c9a15c" />
+              <path
+                d="M78 79l4 4 7-8"
+                stroke="#ffffff"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <p class="card-count">
+            共 <strong id="categoryCount">0</strong> 个分类
+          </p>
+          <div class="card-bar">
+            <i class="gold" id="barC" style="width: 48%"></i>
+          </div>
+          <button class="enter-button gold" type="button" data-enter="all">
+            进入
+          </button>
+        </article>
+      </section>
+
+      <section
+        class="workspace"
+        id="workspace"
+        hidden
+        aria-label="提示词工作台"
+      >
+        <div class="ws-bar">
+          <button class="ws-back" id="wsBack" type="button">← 返回首页</button>
+          <h2 id="indexHeading">全部提示词</h2>
+          <div class="ws-meta">
             <span id="resultCount">0 条结果</span>
             <select class="sort-select" id="sortSelect" aria-label="提示词排序">
               <option value="source">按资料顺序</option>
               <option value="name">按名称排序</option>
               <option value="category">按分类排序</option>
             </select>
-          </div>
-        </header>
-        <div
-          class="prompt-list"
-          id="promptList"
-          role="listbox"
-          aria-label="提示词列表"
-        ></div>
-      </section>
-
-      <main class="reader-pane" id="readerPane">
-        <div class="reader-empty" id="readerEmpty">
-          <div>
-            <strong>选择一条提示词</strong>右侧会显示完整内容和管理工具。
+            <button class="rail-button" id="exportButton" type="button">
+              导出备份
+            </button>
+            <button class="rail-button" id="importButton" type="button">
+              导入备份
+            </button>
+            <input
+              id="importFile"
+              type="file"
+              accept="application/json,.json"
+              hidden
+            />
+            <button class="new-button" id="newPromptButton" type="button">
+              ＋ 新建
+            </button>
           </div>
         </div>
-        <article class="reader" id="reader" hidden>
-          <header class="reader-header">
-            <button class="mobile-back" id="mobileBack" type="button">
-              ← 返回提示词目录
-            </button>
-            <p class="reader-kicker" id="readerCategory"></p>
-            <h2 class="reader-title" id="readerTitle"></h2>
-            <div class="reader-meta" id="readerMeta"></div>
-            <div class="reader-actions">
-              <button
-                class="action-button primary"
-                id="copyButton"
-                type="button"
-              >
-                复制全文
-              </button>
-              <button class="action-button" id="favoriteButton" type="button">
-                加入收藏
-              </button>
-              <button class="action-button" id="editButton" type="button">
-                编辑内容
-              </button>
-              <button
-                class="action-button"
-                id="resetButton"
-                type="button"
-                hidden
-              >
-                恢复原文
-              </button>
-              <button
-                class="action-button danger"
-                id="deleteButton"
-                type="button"
-                hidden
-              >
-                删除自建提示词
-              </button>
+        <div class="ws-body">
+          <nav
+            class="category-nav"
+            id="categoryNav"
+            aria-label="提示词分类"
+          ></nav>
+          <div
+            class="prompt-list"
+            id="promptList"
+            role="listbox"
+            aria-label="提示词列表"
+          ></div>
+          <main class="reader-pane" id="readerPane">
+            <div class="reader-empty" id="readerEmpty">
+              <div>
+                <strong>选择一条提示词</strong>右侧会显示完整内容和管理工具。
+              </div>
             </div>
-          </header>
-          <div class="reader-scroll">
-            <div class="tag-row" id="readerTags"></div>
-            <pre class="prompt-content" id="readerContent"></pre>
-            <p class="source-note" id="sourceNote"></p>
-          </div>
-        </article>
-      </main>
+            <article class="reader" id="reader" hidden>
+              <header class="reader-header">
+                <button class="mobile-back" id="mobileBack" type="button">
+                  ← 返回提示词目录
+                </button>
+                <p class="reader-kicker" id="readerCategory"></p>
+                <h2 class="reader-title" id="readerTitle"></h2>
+                <div class="reader-meta" id="readerMeta"></div>
+                <div class="reader-actions">
+                  <button
+                    class="action-button primary"
+                    id="copyButton"
+                    type="button"
+                  >
+                    复制全文
+                  </button>
+                  <button
+                    class="action-button"
+                    id="favoriteButton"
+                    type="button"
+                  >
+                    加入收藏
+                  </button>
+                  <button class="action-button" id="editButton" type="button">
+                    编辑内容
+                  </button>
+                  <button
+                    class="action-button"
+                    id="resetButton"
+                    type="button"
+                    hidden
+                  >
+                    恢复原文
+                  </button>
+                  <button
+                    class="action-button danger"
+                    id="deleteButton"
+                    type="button"
+                    hidden
+                  >
+                    删除自建提示词
+                  </button>
+                </div>
+              </header>
+              <div class="reader-scroll">
+                <div class="tag-row" id="readerTags"></div>
+                <pre class="prompt-content" id="readerContent"></pre>
+                <p class="source-note" id="sourceNote"></p>
+              </div>
+            </article>
+          </main>
+        </div>
+      </section>
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1829,6 +2420,69 @@
       });
 
       render();
+    </script>
+    <script>
+      (function () {
+        var shell = document.getElementById("appShell");
+        var workspace = document.getElementById("workspace");
+        function enterLibrary(filter) {
+          shell.classList.add("in-library");
+          workspace.hidden = false;
+          if (filter) {
+            activeFilter = filter;
+            render();
+          }
+        }
+        function exitLibrary() {
+          shell.classList.remove("in-library");
+          workspace.hidden = true;
+        }
+        document.querySelectorAll(".enter-button").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            enterLibrary(btn.dataset.enter || "all");
+          });
+        });
+        document.querySelectorAll(".nav-link").forEach(function (link) {
+          link.addEventListener("click", function () {
+            document.querySelectorAll(".nav-link").forEach(function (l) {
+              l.classList.remove("active");
+            });
+            link.classList.add("active");
+            if (link.dataset.nav === "library") enterLibrary("all");
+            else exitLibrary();
+          });
+        });
+        document
+          .getElementById("wsBack")
+          .addEventListener("click", exitLibrary);
+
+        var categoryTotal = new Set(
+          IMPORTED_PROMPTS.map(function (p) {
+            return p.category;
+          }),
+        ).size;
+        document.getElementById("categoryCount").textContent = categoryTotal;
+
+        function setBars() {
+          var t =
+            Number(document.getElementById("totalCount").textContent) || 0;
+          var f =
+            Number(document.getElementById("favoriteCount").textContent) || 0;
+          var max = Math.max(t, f, categoryTotal, 1);
+          document.getElementById("barA").style.width =
+            Math.max(14, Math.round((t / max) * 100)) + "%";
+          document.getElementById("barB").style.width =
+            Math.max(10, Math.round((f / max) * 100)) + "%";
+          document.getElementById("barC").style.width =
+            Math.max(12, Math.round((categoryTotal / max) * 100)) + "%";
+        }
+        var originalRender = render;
+        render = function () {
+          originalRender();
+          setBars();
+        };
+        setBars();
+      })();
     </script>
   </body>
 </html>
